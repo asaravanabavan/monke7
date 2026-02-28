@@ -1,0 +1,6 @@
+pyproject.toml
+nemocraft_backend.egg-info/PKG-INFO
+nemocraft_backend.egg-info/SOURCES.txt
+nemocraft_backend.egg-info/dependency_links.txt
+nemocraft_backend.egg-info/requires.txt
+nemocraft_backend.egg-info/top_level.txt
