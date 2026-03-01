@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+backend/player_data/
+player_data/
+mod/build/
+mod/.gradle/
+*.jar
+server/
+*.log
+26.0.1
+env
