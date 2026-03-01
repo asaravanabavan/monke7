@@ -2,12 +2,10 @@
 __pycache__/
 *.pyc
 .env
+env
 backend/player_data/
 player_data/
 mod/build/
 mod/.gradle/
-*.jar
-server/
+mod/*.jar
 *.log
-26.0.1
-env

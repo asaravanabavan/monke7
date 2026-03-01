@@ -1,0 +1,23 @@
+{
+  "minecraft:recipes/decorations/crafting_table": {
+    "criteria": {
+      "unlock_right_away": "2026-03-01 11:50:55 +0000"
+    },
+    "done": true
+  },
+  "minecraft:adventure/adventuring_time": {
+    "criteria": {
+      "minecraft:sparse_jungle": "2026-03-01 11:52:34 +0000",
+      "minecraft:river": "2026-03-01 11:53:27 +0000",
+      "minecraft:plains": "2026-03-01 11:50:56 +0000"
+    },
+    "done": false
+  },
+  "minecraft:end/dragon_breath": {
+    "criteria": {
+      "dragon_breath": "2026-03-01 12:00:11 +0000"
+    },
+    "done": true
+  },
+  "DataVersion": 3465
+}
