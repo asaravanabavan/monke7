@@ -72,4 +72,93 @@ public class BackendClient {
                 return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                                 .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
         }
+
+        // -- Quest endpoints --------------------------------------------------
+
+        public static CompletableFuture<JsonObject> generateQuests(String playerUuid, String playerName,
+                        double x, double y, double z) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("player_name", playerName);
+                body.addProperty("x", x);
+                body.addProperty("y", y);
+                body.addProperty("z", z);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/quests/generate"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(60))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> listQuests(String playerUuid) {
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/quests/" + playerUuid))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(15))
+                                .GET()
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> acceptQuest(String playerUuid, String questId) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("quest_id", questId);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/quests/accept"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(15))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> sendQuestProgress(String playerUuid,
+                        String objectiveType, String target, int count) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("objective_type", objectiveType);
+                body.addProperty("target", target);
+                body.addProperty("count", count);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/quests/progress"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(15))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> completeQuest(String playerUuid, String questId,
+                        double x, double y, double z) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("quest_id", questId);
+                body.addProperty("x", x);
+                body.addProperty("y", y);
+                body.addProperty("z", z);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/quests/complete"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(120))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
 }

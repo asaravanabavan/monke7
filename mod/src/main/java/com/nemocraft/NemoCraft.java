@@ -20,6 +20,8 @@ public class NemoCraft implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("[NemoCraft] Initializing...");
         NemoBuildCommand.register();
+        NemoQuestCommand.register();
+        QuestTracker.registerEvents();
         ServerTickEvents.END_SERVER_TICK.register(NemoCraft::onServerTick);
         LOGGER.info("[NemoCraft] Ready!");
     }
