@@ -38,10 +38,10 @@ _client = AsyncOpenAI(
 # ---------------------------------------------------------------------------
 # Rate-limit constants
 # ---------------------------------------------------------------------------
-_MAX_MOB_SPAWNS_PER_WINDOW = 3
-_MOB_SPAWN_WINDOW_SECONDS = 600        # 10 minutes
-_MAX_DUNGEONS_PER_WINDOW = 1
-_DUNGEON_WINDOW_SECONDS = 1800          # 30 minutes
+_MAX_MOB_SPAWNS_PER_WINDOW = 999
+_MOB_SPAWN_WINDOW_SECONDS = 1          # 1 second (effectively unlimited)
+_MAX_DUNGEONS_PER_WINDOW = 999
+_DUNGEON_WINDOW_SECONDS = 1            # 1 second (effectively unlimited)
 
 # ---------------------------------------------------------------------------
 # Villain memory model

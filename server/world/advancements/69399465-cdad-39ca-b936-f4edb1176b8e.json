@@ -9,6 +9,8 @@
     "criteria": {
       "minecraft:sparse_jungle": "2026-03-01 11:52:34 +0000",
       "minecraft:river": "2026-03-01 11:53:27 +0000",
+      "minecraft:stony_shore": "2026-03-01 14:24:37 +0000",
+      "minecraft:forest": "2026-03-01 14:14:17 +0000",
       "minecraft:plains": "2026-03-01 11:50:56 +0000"
     },
     "done": false
@@ -22,6 +24,12 @@
   "minecraft:adventure/root": {
     "criteria": {
       "killed_something": "2026-03-01 13:19:27 +0000"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/yellow_dye_from_dandelion": {
+    "criteria": {
+      "has_dandelion": "2026-03-01 14:34:58 +0000"
     },
     "done": true
   },

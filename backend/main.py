@@ -516,6 +516,13 @@ async def api_karma(player_uuid: str):
 
 
 # ---------------------------------------------------------------------------
+# Villain runtime state (mutable — toggled via /api/villain/toggle)
+# ---------------------------------------------------------------------------
+
+_villain_enabled: bool = settings.villain_enabled
+
+
+# ---------------------------------------------------------------------------
 # Villain chatbot request models
 # ---------------------------------------------------------------------------
 
@@ -539,6 +546,10 @@ class VillainEventRequest(BaseModel):
     z: float = 0
 
 
+class VillainToggleRequest(BaseModel):
+    enabled: bool
+
+
 # ---------------------------------------------------------------------------
 # Villain endpoints
 # ---------------------------------------------------------------------------
@@ -548,15 +559,25 @@ class VillainEventRequest(BaseModel):
 async def api_villain_status():
     """Check if the villain chatbot is enabled."""
     return {
-        "enabled": settings.villain_enabled,
+        "enabled": _villain_enabled,
         "name": settings.villain_name,
     }
+
+
+@app.post("/api/villain/toggle")
+async def api_villain_toggle(req: VillainToggleRequest):
+    """Toggle the villain on or off at runtime."""
+    global _villain_enabled
+    _villain_enabled = req.enabled
+    state = "enabled" if _villain_enabled else "disabled"
+    logger.info("Villain toggled: %s", state)
+    return {"enabled": _villain_enabled, "name": settings.villain_name}
 
 
 @app.post("/api/villain/chat")
 async def api_villain_chat(req: VillainChatRequest):
     """Player chat routed to the villain agent."""
-    if not settings.villain_enabled:
+    if not _villain_enabled:
         return {"status": "disabled"}
 
     agent = VillainAgent(data_dir=DATA_DIR)
@@ -579,7 +600,7 @@ async def api_villain_chat(req: VillainChatRequest):
 @app.post("/api/villain/event")
 async def api_villain_event(req: VillainEventRequest):
     """Game event notification routed to the villain agent."""
-    if not settings.villain_enabled:
+    if not _villain_enabled:
         return {"status": "disabled"}
 
     agent = VillainAgent(data_dir=DATA_DIR)

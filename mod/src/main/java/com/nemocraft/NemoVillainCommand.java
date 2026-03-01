@@ -77,6 +77,11 @@ public class NemoVillainCommand {
     private static int executeOn(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         VillainChatHandler.setEnabled(true);
+        BackendClient.villainToggle(true)
+                .exceptionally(error -> {
+                    NemoCraft.LOGGER.warn("[NemoCraft] Failed to toggle villain on backend: {}", error.getMessage());
+                    return null;
+                });
         source.sendFeedback(() -> Text.literal("[NemoCraft] ").formatted(Formatting.GOLD)
                 .append(Text.literal("Lord Netherbane has entered the realm! MWAHAHAHA!").formatted(Formatting.DARK_RED, Formatting.BOLD)), false);
         return 1;
@@ -87,6 +92,11 @@ public class NemoVillainCommand {
     private static int executeOff(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         VillainChatHandler.setEnabled(false);
+        BackendClient.villainToggle(false)
+                .exceptionally(error -> {
+                    NemoCraft.LOGGER.warn("[NemoCraft] Failed to toggle villain on backend: {}", error.getMessage());
+                    return null;
+                });
         source.sendFeedback(() -> Text.literal("[NemoCraft] ").formatted(Formatting.GOLD)
                 .append(Text.literal("Lord Netherbane retreats to the shadows...").formatted(Formatting.GRAY)), false);
         return 1;

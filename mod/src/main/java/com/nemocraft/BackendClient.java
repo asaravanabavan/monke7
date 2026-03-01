@@ -221,4 +221,19 @@ public class BackendClient {
                 return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                                 .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
         }
+
+        public static CompletableFuture<JsonObject> villainToggle(boolean enabled) {
+                JsonObject body = new JsonObject();
+                body.addProperty("enabled", enabled);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/villain/toggle"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(10))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
 }
