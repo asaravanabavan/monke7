@@ -63,6 +63,14 @@ VALID_BLOCK_IDS: set[str] = {
     "minecraft:purpur_block", "minecraft:purpur_pillar",
     "minecraft:purpur_slab", "minecraft:purpur_stairs",
 
+    # Quartz palette (Sacred / Celestial tiers)
+    "minecraft:quartz_block", "minecraft:smooth_quartz",
+    "minecraft:chiseled_quartz_block", "minecraft:quartz_pillar",
+    "minecraft:quartz_bricks", "minecraft:quartz_slab", "minecraft:quartz_stairs",
+
+    # Beacon
+    "minecraft:beacon",
+
     # Sandstone palette
     "minecraft:sandstone", "minecraft:smooth_sandstone",
     "minecraft:chiseled_sandstone", "minecraft:cut_sandstone",
@@ -142,12 +150,15 @@ VALID_BLOCK_IDS: set[str] = {
     "minecraft:red_stained_glass", "minecraft:blue_stained_glass",
     "minecraft:cyan_stained_glass", "minecraft:purple_stained_glass",
     "minecraft:orange_stained_glass", "minecraft:yellow_stained_glass",
+    "minecraft:green_stained_glass", "minecraft:pink_stained_glass",
+    "minecraft:light_blue_stained_glass", "minecraft:magenta_stained_glass",
     "minecraft:glass_pane", "minecraft:iron_bars",
 
     # Nature / organic
     "minecraft:grass_block", "minecraft:dirt", "minecraft:coarse_dirt",
     "minecraft:podzol", "minecraft:mycelium", "minecraft:mud",
     "minecraft:packed_mud", "minecraft:moss_block", "minecraft:moss_carpet",
+    "minecraft:vine",
     "minecraft:clay", "minecraft:gravel", "minecraft:sand", "minecraft:red_sand",
     "minecraft:snow_block", "minecraft:packed_ice", "minecraft:blue_ice",
     "minecraft:ice", "minecraft:dripstone_block",

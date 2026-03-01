@@ -16,6 +16,7 @@ import mctools
 
 from backend.config import settings
 from backend.placer import PlacedBlueprint, PlacedRoom, PlacedCorridor
+from backend.karma import KarmaTier, TIER_STYLE_WEIGHTS
 
 if TYPE_CHECKING:
     pass
@@ -223,11 +224,27 @@ class BuildExecutor:
 
     # -- architectural style system -------------------------------------------
 
-    def _pick_style(self, room: PlacedRoom) -> str:
-        """Pick an architectural style based on room dimensions."""
+    def _pick_style(self, room: PlacedRoom, karma_tier: str = "neutral") -> str:
+        """Pick an architectural style based on room dimensions and karma tier.
+
+        When a non-neutral karma tier is provided, uses weighted random selection
+        from the tier's style preferences.  Falls back to dimension-based selection.
+        """
         import random
         w, h, d = room.width, room.height, room.depth
         area = w * d
+
+        # Karma-driven weighted selection
+        if karma_tier != "neutral":
+            try:
+                tier_enum = KarmaTier(karma_tier)
+                weights = TIER_STYLE_WEIGHTS.get(tier_enum)
+                if weights:
+                    style_names = list(weights.keys())
+                    style_weights = list(weights.values())
+                    return random.choices(style_names, weights=style_weights, k=1)[0]
+            except (ValueError, KeyError):
+                pass  # fall through to default logic
 
         styles = []
         if area >= 150 and h >= 7:
@@ -688,7 +705,7 @@ class BuildExecutor:
     # -- high-level build orchestration --------------------------------------
 
     def _build_room(self, room: PlacedRoom, room_index: int = 0,
-                    total_rooms: int = 1) -> None:
+                    total_rooms: int = 1, karma_tier: str = "neutral") -> None:
         """Execute all build phases for a single room, with style-based enhancements."""
         # Core structure
         self._build_room_shell(room)
@@ -706,8 +723,8 @@ class BuildExecutor:
         elif shape == "circle" and room.width >= 8 and room.depth >= 8:
             self._shape_circle(room)
 
-        # Pick and apply a random architectural style
-        style = self._pick_style(room)
+        # Pick and apply a random architectural style (karma-aware)
+        style = self._pick_style(room, karma_tier=karma_tier)
         self._apply_style(room, style)
 
         # Carve entrances between rooms and corridors
@@ -744,6 +761,7 @@ class BuildExecutor:
         """
         total_rooms = len(placed.rooms)
         total_corridors = len(placed.corridors)
+        karma_tier = placed.karma_tier
 
         self.connect()
         try:
@@ -765,7 +783,8 @@ class BuildExecutor:
                         color="gold",
                     )
                 )
-                self._build_room(room, room_index=idx - 1, total_rooms=total_rooms)
+                self._build_room(room, room_index=idx - 1, total_rooms=total_rooms,
+                                 karma_tier=karma_tier)
                 logger.info("Built room %d/%d: %s", idx, total_rooms, room.name)
 
                 await asyncio.sleep(settings.build_delay)

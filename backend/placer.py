@@ -35,8 +35,9 @@ class PlacedBlueprint(BaseModel):
     name: str
     rooms: list[PlacedRoom]
     corridors: list[PlacedCorridor]
+    karma_tier: str = "neutral"
 
-def solve_placement(blueprint: Blueprint, player_x: int, player_y: int, player_z: int) -> PlacedBlueprint:
+def solve_placement(blueprint: Blueprint, player_x: int, player_y: int, player_z: int, karma_tier: str = "neutral") -> PlacedBlueprint:
     """
     Place rooms in a linear chain along +Z starting from the player's position.
 
@@ -138,4 +139,5 @@ def solve_placement(blueprint: Blueprint, player_x: int, player_y: int, player_z
         name=blueprint.name,
         rooms=placed_rooms,
         corridors=placed_corridors,
+        karma_tier=karma_tier,
     )

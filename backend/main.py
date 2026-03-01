@@ -18,6 +18,7 @@ from backend.placer import solve_placement
 from backend.builder import BuildExecutor
 from backend.stats import PlayerProfile
 from backend.narrative import NarrativeEngine, NarrativeContext
+from backend.karma import KarmaTier, TIER_PALETTES
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -41,6 +42,8 @@ _PALETTE_KEYWORDS: dict[str, list[str]] = {
     "deepslate": ["deep", "deepslate", "sculk"],
     "ocean": ["ocean", "prismarine", "guardian"],
     "end": ["end", "purpur", "dragon"],
+    "abyssal": ["abyssal", "void", "eldritch"],
+    "sandstone": ["sandstone", "temple", "holy"],
 }
 
 # ---------------------------------------------------------------------------
@@ -130,18 +133,25 @@ async def api_build(req: BuildRequest):
     # 2. Build narrative context if player_uuid is provided
     narrative_context: NarrativeContext | None = None
     narrative_engine: NarrativeEngine | None = None
+    karma_tier_str = "neutral"
     if req.player_uuid:
         try:
             narrative_engine = NarrativeEngine(data_dir=DATA_DIR)
             narrative_context = narrative_engine.build_context(
                 req.player_uuid, req.player_name,
             )
+            karma_tier_str = narrative_context.karma_tier
             logger.info(
-                "Narrative context built for %s: theme=%s, difficulty=%d",
+                "Narrative context built for %s: theme=%s, difficulty=%d, karma=%s",
                 req.player_uuid,
                 narrative_context.theme,
                 narrative_context.difficulty_level,
+                karma_tier_str,
             )
+            # Karma palette override when non-neutral and no explicit palette requested
+            if not req.palette and narrative_context.karma_palette:
+                palette = narrative_context.karma_palette
+                logger.info("Karma palette override: %s", palette)
         except Exception:
             logger.exception("Failed to build narrative context, proceeding without it")
             narrative_context = None
@@ -154,8 +164,9 @@ async def api_build(req: BuildRequest):
         logger.exception("AI blueprint generation failed, using fallback")
         blueprint = get_fallback_blueprint(palette)
 
-    # 4. Solve placement
-    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z))
+    # 4. Solve placement (with karma tier)
+    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z),
+                             karma_tier=karma_tier_str)
 
     # 5. Build in-world via RCON
     try:
@@ -186,10 +197,16 @@ async def api_build(req: BuildRequest):
 
 @app.post("/api/stats")
 async def api_stats(req: StatsRequest):
-    """Ingest a player stats snapshot."""
+    """Ingest a player stats snapshot and return karma state."""
     profile = PlayerProfile(req.player_uuid, data_dir=DATA_DIR)
     profile.add_snapshot(req.stats)
-    return {"status": "ok"}
+    karma_score = profile.get_karma_score()
+    karma_tier = profile.get_karma_tier()
+    return {
+        "status": "ok",
+        "karma_score": karma_score,
+        "karma_tier": karma_tier.value,
+    }
 
 
 @app.post("/api/check")
@@ -219,25 +236,32 @@ async def api_check(req: CheckRequest):
             return {"generate": False, "message": "Cooldown active"}
 
     # 3. Should generate — build narrative context
+    karma_tier_str = "neutral"
     try:
         narrative_context = narrative_engine.build_context(
             req.player_uuid, "Adventurer",
         )
+        karma_tier_str = narrative_context.karma_tier
     except Exception:
         logger.exception("Failed to build narrative context for auto-gen")
         narrative_context = None
 
     # 4. Generate blueprint (with fallback)
     narrative_dict = narrative_context.model_dump() if narrative_context else None
-    palette = narrative_context.theme if narrative_context else "stone"
-    # Map narrative themes to palettes
-    palette_map = {
-        "retribution": "nether",
-        "discovery": "stone",
-        "invasion": "deepslate",
-        "mystery": "end",
-    }
-    palette = palette_map.get(palette, "stone")
+
+    # Karma palette override takes priority over theme-based palette
+    if narrative_context and narrative_context.karma_palette:
+        palette = narrative_context.karma_palette
+    else:
+        palette = narrative_context.theme if narrative_context else "stone"
+        # Map narrative themes to palettes
+        palette_map = {
+            "retribution": "nether",
+            "discovery": "stone",
+            "invasion": "deepslate",
+            "mystery": "end",
+        }
+        palette = palette_map.get(palette, "stone")
 
     try:
         blueprint = await generate_blueprint(
@@ -247,8 +271,9 @@ async def api_check(req: CheckRequest):
         logger.exception("AI blueprint generation failed for auto-gen, using fallback")
         blueprint = get_fallback_blueprint(palette)
 
-    # 5. Place and build
-    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z))
+    # 5. Place and build (with karma tier)
+    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z),
+                             karma_tier=karma_tier_str)
 
     try:
         executor = BuildExecutor()
@@ -274,4 +299,24 @@ async def api_check(req: CheckRequest):
     return {
         "generate": True,
         "message": f"Auto-generated dungeon: {result['name']}",
+    }
+
+
+@app.get("/api/karma/{player_uuid}")
+async def api_karma(player_uuid: str):
+    """Debug endpoint: return full karma state for a player."""
+    profile = PlayerProfile(player_uuid, data_dir=DATA_DIR)
+    karma = profile.karma
+    score = profile.get_karma_score()
+    tier = profile.get_karma_tier()
+    return {
+        "player_uuid": player_uuid,
+        "karma_score": score,
+        "karma_tier": tier.value,
+        "dimensions": {
+            "violence": round(karma.violence, 2),
+            "nature": round(karma.nature, 2),
+            "social": round(karma.social, 2),
+        },
+        "last_updated": karma.last_updated,
     }

@@ -171,8 +171,38 @@ def _build_user_prompt(
     if narrative_context:
         ctx_lines: list[str] = []
         for key, value in narrative_context.items():
+            if key.startswith("karma_"):
+                continue  # handled separately below
             ctx_lines.append(f"- {key}: {value}")
         parts.append("Narrative context:\n" + "\n".join(ctx_lines))
+
+        # Add karma alignment section when karma is non-neutral
+        karma_tier = narrative_context.get("karma_tier", "neutral")
+        karma_narrative = narrative_context.get("karma_narrative", "")
+        karma_mood = narrative_context.get("karma_mood", "")
+        karma_palette = narrative_context.get("karma_palette", "")
+        if karma_tier != "neutral" and karma_narrative:
+            karma_section = (
+                f"## KARMA ALIGNMENT\n"
+                f"- Tier: {karma_tier}\n"
+                f"- Mood: {karma_mood}\n"
+                f"- Palette: {karma_palette}\n"
+                f"- {karma_narrative}\n"
+                f"\n"
+                f"The dungeon name, room names, block choices, and mob selections "
+                f"MUST reflect the {karma_tier} karma alignment. "
+            )
+            if karma_tier in ("abyssal", "dark", "shadowed"):
+                karma_section += (
+                    "Use dark, ominous, corrupted themes. "
+                    "Names should evoke dread, punishment, or decay."
+                )
+            elif karma_tier in ("blessed", "sacred", "celestial"):
+                karma_section += (
+                    "Use light, holy, ethereal themes. "
+                    "Names should evoke divinity, hope, or transcendence."
+                )
+            parts.append(karma_section)
 
     parts.append(
         "Return the dungeon blueprint as a JSON object that follows the schema "
