@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING
 import mctools
 
 from backend.config import settings
+from backend.karma import KarmaTier, TIER_STYLE_WEIGHTS
 from backend.placer import PlacedBlueprint, PlacedRoom, PlacedCorridor
 
 if TYPE_CHECKING:
@@ -307,13 +308,31 @@ class BuildExecutor:
     # ARCHITECTURAL STYLE SYSTEM
     # ======================================================================
 
-    def _pick_style(self, room: PlacedRoom, shape: str) -> str:
-        """Pick an architectural style compatible with the room's shape and dimensions."""
+    def _pick_style(self, room: PlacedRoom, shape: str, karma_tier: str = "neutral") -> str:
+        """Pick an architectural style compatible with the room's shape and dimensions.
+
+        When *karma_tier* is non-neutral, karma-weighted style preferences take
+        priority (filtered to shape-compatible styles).
+        """
         w, h, d = room.width, room.height, room.depth
         area = w * d
 
         # Get compatible styles for this shape
         compatible = list(_SHAPE_STYLE_COMPAT.get(shape, ["grand_hall"]))
+
+        # Karma-driven weighted selection (takes priority)
+        if karma_tier != "neutral":
+            try:
+                tier_enum = KarmaTier(karma_tier)
+                weights = TIER_STYLE_WEIGHTS.get(tier_enum)
+                if weights:
+                    valid_weights = {k: v for k, v in weights.items() if k in compatible}
+                    if valid_weights:
+                        style_names = list(valid_weights.keys())
+                        style_weights = list(valid_weights.values())
+                        return random.choices(style_names, weights=style_weights, k=1)[0]
+            except (ValueError, KeyError):
+                pass  # fall through to default logic
 
         # Filter by dimension requirements
         candidates = []
@@ -1747,7 +1766,8 @@ class BuildExecutor:
     # ======================================================================
 
     def _build_room(self, room: PlacedRoom, room_index: int = 0,
-                    total_rooms: int = 1, structure_type: str = "dungeon") -> None:
+                    total_rooms: int = 1, structure_type: str = "dungeon",
+                    karma_tier: str = "neutral") -> None:
         """Execute all build phases for a single room/building.
 
         Build order:
@@ -1798,7 +1818,7 @@ class BuildExecutor:
 
         # Phase 9: Architectural style (dungeons only)
         if is_dungeon:
-            style = self._pick_style(room, shape)
+            style = self._pick_style(room, shape, karma_tier=karma_tier)
             self._apply_style(room, style)
 
         # Phase 10-11: Windows and doors (buildings only)
@@ -1892,27 +1912,102 @@ class BuildExecutor:
         return int(x_min), int(y_min), int(z_min), int(x_max), int(y_max), int(z_max)
 
     def _clear_build_area(self, placed: PlacedBlueprint, padding: int = 2) -> None:
-        """Clear the entire dungeon footprint (plus padding) with air.
+        """Clear the build footprint and lay a solid foundation beneath it.
 
-        This removes any terrain that would otherwise clip through the dungeon
-        walls, giving it a clean build space.
+        1. Fill a foundation platform from ``y_min - depth`` up to ``y_min - 1``
+           so the structure never floats above uneven terrain.
+        2. Clear air from ``y_min`` up to ``y_max + padding`` so terrain doesn't
+           clip through walls.
+        3. Add a 1-block border step around the foundation for a finished look.
         """
         x_min, y_min, z_min, x_max, y_max, z_max = self._compute_bounding_box(placed)
 
-        # Add padding around the sides and top so the dungeon sits in open space.
-        # No padding below — the floor should rest on the ground.
-        x_min -= padding
-        x_max += padding
-        z_min -= padding
-        z_max += padding
-        y_max += padding
+        # Determine the primary floor block from the first room for the foundation
+        foundation_block = "minecraft:stone"
+        foundation_base = "minecraft:cobblestone"
+        if placed.rooms:
+            fb = placed.rooms[0].floor_block
+            if fb and fb in (
+                "minecraft:cobblestone", "minecraft:stone_bricks",
+                "minecraft:deepslate_bricks", "minecraft:polished_deepslate",
+                "minecraft:polished_blackstone", "minecraft:prismarine_bricks",
+                "minecraft:purpur_block", "minecraft:sandstone",
+                "minecraft:cobbled_deepslate", "minecraft:stone",
+                "minecraft:oak_planks", "minecraft:spruce_planks",
+                "minecraft:dark_oak_planks", "minecraft:birch_planks",
+            ):
+                foundation_block = fb
+            else:
+                foundation_block = "minecraft:stone_bricks"
+
+        # Foundation depth — how far down to fill beneath the structure
+        foundation_depth = 5
+
+        # Padded footprint for clearing
+        clear_x_min = x_min - padding
+        clear_x_max = x_max + padding
+        clear_z_min = z_min - padding
+        clear_z_max = z_max + padding
+        clear_y_max = y_max + padding
 
         logger.info(
-            "Clearing build area: (%d,%d,%d) to (%d,%d,%d)",
-            x_min, y_min, z_min, x_max, y_max, z_max,
+            "Preparing build area: (%d,%d,%d) to (%d,%d,%d) with %d-deep foundation",
+            clear_x_min, y_min - foundation_depth, clear_z_min,
+            clear_x_max, clear_y_max, clear_z_max,
+            foundation_depth,
         )
 
-        for cmd in _chunked_fills(x_min, y_min, z_min, x_max, y_max, z_max, "minecraft:air"):
+        # Phase 1: Fill the foundation volume (below y_min) with solid blocks.
+        # This prevents floating structures on slopes and fills gaps.
+        foundation_y_min = y_min - foundation_depth
+        foundation_y_max = y_min - 1
+
+        # Inner foundation uses the floor block material
+        for cmd in _chunked_fills(
+            x_min, foundation_y_min, z_min,
+            x_max, foundation_y_max, z_max,
+            foundation_block,
+        ):
+            self._cmd(cmd)
+
+        # Outer foundation ring (the padding border) uses rougher stone
+        # Fill full padded area with base material, then the inner was already
+        # filled with the nicer block above — so just fill the border strips.
+        # Left strip
+        for cmd in _chunked_fills(
+            clear_x_min, foundation_y_min, clear_z_min,
+            x_min - 1, foundation_y_max, clear_z_max,
+            foundation_base,
+        ):
+            self._cmd(cmd)
+        # Right strip
+        for cmd in _chunked_fills(
+            x_max + 1, foundation_y_min, clear_z_min,
+            clear_x_max, foundation_y_max, clear_z_max,
+            foundation_base,
+        ):
+            self._cmd(cmd)
+        # Front strip (between left and right)
+        for cmd in _chunked_fills(
+            x_min, foundation_y_min, clear_z_min,
+            x_max, foundation_y_max, z_min - 1,
+            foundation_base,
+        ):
+            self._cmd(cmd)
+        # Back strip (between left and right)
+        for cmd in _chunked_fills(
+            x_min, foundation_y_min, z_max + 1,
+            x_max, foundation_y_max, clear_z_max,
+            foundation_base,
+        ):
+            self._cmd(cmd)
+
+        # Phase 2: Clear air above the foundation so terrain doesn't clip walls.
+        for cmd in _chunked_fills(
+            clear_x_min, y_min, clear_z_min,
+            clear_x_max, clear_y_max, clear_z_max,
+            "minecraft:air",
+        ):
             self._cmd(cmd)
 
     # -- public API ----------------------------------------------------------
@@ -1931,6 +2026,7 @@ class BuildExecutor:
         total_rooms = len(placed.rooms)
         total_corridors = len(placed.corridors)
         structure_type = placed.structure_type
+        karma_tier = getattr(placed, 'karma_tier', 'neutral')
 
         # Label for user-facing messages
         is_village = structure_type in ("village", "marketplace", "farm")
@@ -1966,6 +2062,7 @@ class BuildExecutor:
                     room_index=idx - 1,
                     total_rooms=total_rooms,
                     structure_type=structure_type,
+                    karma_tier=karma_tier,
                 )
                 logger.info("Built %s %d/%d: %s", room_label, idx, total_rooms, room.name)
 

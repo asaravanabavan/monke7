@@ -33,6 +33,20 @@ class Settings(BaseSettings):
     auto_generate_threshold: float = 0.3
     auto_generate_cooldown_minutes: int = 30
 
+    # Karma system
+    karma_enable: bool = True
+    karma_decay_rate: float = 0.01          # λ per hour (~69h half-life)
+    karma_violence_weight: float = 0.3      # composite weight
+    karma_nature_weight: float = 0.3        # composite weight
+    karma_social_weight: float = 0.4        # composite weight (heaviest)
+
+    # Villain chatbot (all default OFF)
+    villain_enabled: bool = False
+    villain_name: str = "Lord Netherbane"
+    villain_react_probability: float = 0.3
+    villain_max_history: int = 20
+    villain_cooldown_seconds: int = 5
+
     model_config = {"env_prefix": "NEMO_", "env_file": ".env"}
 
 

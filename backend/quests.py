@@ -361,7 +361,14 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_sword", "minecraft:golden_apple"], "experience": 500},
                     "destination_type": "dungeon",
-                    "destination_prompt": "A dark stone crypt infested with undead, deep underground with skull decorations and cobwebs",
+                    "destination_prompt": (
+                        "A multi-room stone brick crypt with 3-4 rooms connected by narrow corridors. "
+                        "First room: entrance hall with cracked stone brick pillars, iron bar windows, and skull decorations on the walls. "
+                        "Second room: a large burial chamber with cobweb-covered ceiling, soul torches in alcoves, bone block floor accents, "
+                        "and skeleton spawners behind iron bars. Third room: the warlord's tomb — a grand vaulted chamber with "
+                        "a central sarcophagus made of gold blocks, chains hanging from the ceiling, and loot chests on either side. "
+                        "Use deepslate bricks for lower walls, cracked stone bricks for upper walls, and polished blackstone for floors."
+                    ),
                 },
                 {
                     "name": "Arena of Blood",
@@ -373,7 +380,14 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_chestplate", "minecraft:enchanted_golden_apple"], "experience": 800},
                     "destination_type": "arena",
-                    "destination_prompt": "A grand gladiator arena with lava moat, stone brick walls, and spectator stands",
+                    "destination_prompt": (
+                        "A grand circular gladiator arena with 3 rooms. Main arena: a large open-air colosseum (25x10x25) "
+                        "with a sunken fighting pit 2 blocks deep, lava channels around the perimeter, iron bar cages "
+                        "on the walls with zombie and skeleton spawners inside, stone brick spectator stands rising in tiers, "
+                        "red wool banners on pillars, and campfire braziers at each corner. Armory room: weapon racks made of "
+                        "anvils and armor stands, chests with combat loot. Champion's hall: a throne of gold blocks and "
+                        "stairs with a red carpet leading to it, diamond block trophy pedestals, and hanging lanterns with chains."
+                    ),
                 },
                 {
                     "name": "The Spider Queen's Lair",
@@ -385,7 +399,15 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:bow", "minecraft:arrow", "minecraft:iron_sword"], "experience": 400},
                     "destination_type": "mine",
-                    "destination_prompt": "An abandoned mineshaft overrun with cobwebs, spiders, and cave spider spawners",
+                    "destination_prompt": (
+                        "An abandoned mineshaft dungeon with 3-4 rooms connected by narrow tunnels. Entry shaft: "
+                        "cobblestone and oak plank walls with broken minecart tracks (rail blocks), scattered torches, "
+                        "and cobwebs in every corner. Mining gallery: a tall room with oak log support pillars, "
+                        "ore block veins (iron, coal, gold) exposed in the deepslate walls, broken ladders, and "
+                        "cave spider spawners hidden behind cobweb clusters. Spider nest: the deepest room with "
+                        "walls entirely covered in cobwebs, white wool egg sacs on the floor, soul torches for eerie "
+                        "blue lighting, and a massive cobweb canopy across the ceiling with spiders and cave spiders."
+                    ),
                 },
             ],
             "explorer": [
@@ -399,7 +421,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:spyglass", "minecraft:compass", "minecraft:diamond"], "experience": 600},
                     "destination_type": "temple",
-                    "destination_prompt": "A hidden jungle temple with ancient traps, gold decorations, and mysterious enchanting rooms",
+                    "destination_prompt": (
+                        "A hidden jungle temple complex with 3-4 rooms in a circular layout. Entrance courtyard: "
+                        "mossy cobblestone walls with vine overgrowth, chiseled stone brick pillars forming a colonnade, "
+                        "a central fountain made of water and prismarine, and flower pots with ferns. Inner sanctum: "
+                        "tall ceiling (12+ blocks) with gold block accents, enchanting tables on pedestals, "
+                        "end rod lighting along the walls, lecterns with books, candle clusters on the floor, "
+                        "and stained glass (colored glass panes) in the walls. Trap corridor: pressure plates connected "
+                        "to dispensers, tripwire, and arrow slits (iron bars) in the walls. Treasure vault: "
+                        "a small room with chiseled stone bricks, a loot chest on a gold block pedestal, "
+                        "iron golems as guardians, and emerald block decorations."
+                    ),
                 },
                 {
                     "name": "Village in Peril",
@@ -411,7 +443,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:emerald", "minecraft:golden_apple", "minecraft:iron_ingot"], "experience": 500},
                     "destination_type": "village",
-                    "destination_prompt": "A small wooden village under siege with barricades, watchtowers, and defensive walls",
+                    "destination_prompt": (
+                        "A besieged village settlement with 4-5 buildings in a cluster layout connected by gravel paths. "
+                        "Blacksmith forge: stone brick walls, furnaces, anvils, lava source as the forge, iron bars on windows, "
+                        "and a peaked oak plank roof. Town hall: the largest building with oak log framing, cobblestone base, "
+                        "peaked roof, a bell in the entrance, bookshelves, a crafting table, and a lectern. "
+                        "Farmstead: oak plank walls with a fence perimeter and garden exterior, hay bales inside, "
+                        "a composting area, wheat crops nearby. Guard tower: a tall 3-story cobblestone watchtower with "
+                        "peaked roof, crossbow slits (iron bars), lanterns on each floor, and a lookout platform. "
+                        "All buildings should have windows (glass panes), doors, and warm lighting (lanterns, torches). "
+                        "Villagers, cats, and an iron golem should populate the village. Pillagers lurk outside."
+                    ),
                 },
                 {
                     "name": "Cartographer's Challenge",
@@ -423,7 +465,16 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:map", "minecraft:diamond", "minecraft:ender_pearl"], "experience": 450},
                     "destination_type": "dungeon",
-                    "destination_prompt": "An underground river cavern with prismarine walls, water features, and glowing crystals",
+                    "destination_prompt": (
+                        "An underground river cavern system with 3 rooms connected by flooded corridors. "
+                        "Entry grotto: prismarine and stone walls with water pools on the floor, sea lantern "
+                        "lighting embedded in walls, glowstone veins in the ceiling, and dripping chains. "
+                        "River chamber: a wide room with a water channel running through the center, "
+                        "prismarine brick bridges crossing it, coral blocks and sea pickles along the waterline, "
+                        "and dark prismarine pillars supporting a mossy ceiling. Crystal cavern: the deepest room "
+                        "with amethyst block clusters, glowstone formations, a central pool with soul lanterns "
+                        "beneath the water, and a cartography table with map chests on the shore."
+                    ),
                 },
             ],
             "builder": [
@@ -437,7 +488,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_pickaxe", "minecraft:emerald", "minecraft:lantern"], "experience": 500},
                     "destination_type": "castle",
-                    "destination_prompt": "A crumbling ancient castle with missing walls, overgrown vines, and mossy stone bricks",
+                    "destination_prompt": (
+                        "A crumbling medieval castle with 3 rooms in a linear layout. Gatehouse: stone brick walls with "
+                        "mossy stone brick patches, cracked stone bricks showing age, iron bar portcullis, a flat roof "
+                        "with battlements, arrow slits in the walls, and defensive wall exterior. Courtyard hall: "
+                        "a large open room with broken stone brick pillars (some only 2-3 blocks tall), vine-covered "
+                        "walls, mossy cobblestone floor with grass patches, a crumbled section where wall blocks are "
+                        "missing, and scattered cobblestone debris (detail blocks). Ruined throne room: the back chamber "
+                        "with a partially collapsed ceiling (air holes with vines hanging through), a damaged throne "
+                        "made of stairs and gold blocks, faded red wool carpet remnants, and cobweb-filled alcoves "
+                        "where banners once hung. Use mixed stone brick variants throughout for a weathered look."
+                    ),
                 },
                 {
                     "name": "Marketplace Mayhem",
@@ -449,7 +510,18 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:emerald", "minecraft:diamond", "minecraft:iron_ingot"], "experience": 350},
                     "destination_type": "marketplace",
-                    "destination_prompt": "A bustling marketplace with wooden stalls, colorful wool banners, and trading villagers",
+                    "destination_prompt": (
+                        "A bustling marketplace with 4-5 small buildings in a grid layout connected by cobblestone paths. "
+                        "General store: spruce plank walls with oak log corners, peaked roof, glass pane windows, "
+                        "a door with a porch, barrels and chests inside with trade goods, lantern lighting. "
+                        "Bakery: a small brick building with a furnace, crafting table, flower pots on windowsills, "
+                        "and hay bale storage. Weapon shop: stone brick base with dark oak upper walls, anvils inside, "
+                        "iron bar displays, and armor stands. Town well: a tiny cobblestone structure with a "
+                        "cauldron of water, chain and fence post above it, and flower gardens around it. "
+                        "Each building should have a peaked roof, windows, doors, and a fence or garden exterior. "
+                        "Populate with villagers, cats, and wandering traders. Wool banners of different colors "
+                        "on fence posts mark each stall."
+                    ),
                 },
                 {
                     "name": "The Lighthouse Keeper",
@@ -460,8 +532,17 @@ class QuestEngine:
                         {"description": "Place glowstone to relight the beacon", "objective_type": "build", "target": "minecraft:glowstone", "target_count": 16},
                     ],
                     "rewards": {"items": ["minecraft:spyglass", "minecraft:lantern", "minecraft:golden_apple"], "experience": 400},
-                    "destination_type": "lighthouse",
-                    "destination_prompt": "A tall stone lighthouse on a cliff with a spiral staircase and broken beacon room at the top",
+                    "destination_type": "tower",
+                    "destination_prompt": (
+                        "A tall coastal lighthouse tower (height 16-20 blocks) with 3-4 floors. Built from stone bricks "
+                        "with a white concrete stripe pattern. Ground floor: a keeper's quarters with a furnace, bed "
+                        "(wool blocks), bookshelf, crafting table, and a spiral staircase up (oak stairs wrapping the "
+                        "interior wall). Middle floors: storage rooms with barrels, chests of supplies, iron bar windows "
+                        "looking outward, and lantern wall sconces. Top floor: the beacon room — a domed roof with "
+                        "glowstone and sea lantern blocks forming the light, glass pane walls on all sides for "
+                        "360-degree visibility, a railing of fences around an exterior walkway, and a spyglass on a "
+                        "lectern. The exterior should have a peaked or dome roof and a fence walkway at the top level."
+                    ),
                 },
             ],
             "balanced": [
@@ -476,7 +557,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_sword", "minecraft:golden_apple", "minecraft:emerald"], "experience": 600},
                     "destination_type": "dungeon",
-                    "destination_prompt": "A sealed underground vault with iron doors, trapped corridors, and a treasure chamber",
+                    "destination_prompt": (
+                        "A sealed underground vault dungeon with 3-4 rooms in a linear layout. Entrance chamber: "
+                        "iron door frame with chiseled stone bricks, pressure plate traps, skeleton archers in "
+                        "alcoves behind iron bars, and dim lantern lighting on chains. Trap corridor: a narrow passage "
+                        "with dispensers hidden in walls, tripwire, cobwebs across the ceiling, and scattered bone "
+                        "blocks from previous adventurers. Guard room: polished deepslate floor, deepslate brick walls, "
+                        "zombie spawners behind iron bar cages, weapon racks (anvils), and armor display alcoves. "
+                        "Treasury: the final room with polished blackstone floor, gold block pedestals displaying loot "
+                        "chests, diamond block accents, emerald block pillars, lanterns hanging from chains at multiple "
+                        "heights, and a grand central chest on an elevated platform of quartz stairs."
+                    ),
                 },
                 {
                     "name": "The Hermit's Request",
@@ -488,7 +579,16 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:enchanted_golden_apple", "minecraft:ender_pearl"], "experience": 300},
                     "destination_type": "house",
-                    "destination_prompt": "A cozy mountain cabin with a chimney, enchanting table, and bookshelves full of ancient tomes",
+                    "destination_prompt": (
+                        "A cozy 2-story mountain cabin. Ground floor: spruce plank walls with spruce log corner "
+                        "pillars, cobblestone foundation, a peaked spruce roof, glass pane windows on all sides, "
+                        "a door with a porch exterior. Interior: a furnace and campfire as the hearth against one wall, "
+                        "a crafting table, bookshelves lining two walls floor to ceiling, a lectern with a book, "
+                        "flower pots on windowsills, a red wool and white wool bed, and warm lantern lighting. "
+                        "Second floor: an enchanting room with an enchanting table surrounded by bookshelves, "
+                        "brewing stands, candle clusters, and a balcony (fence railing) overlooking the entrance. "
+                        "Garden exterior with fence perimeter, composters, flower pots, and a small animal pen."
+                    ),
                 },
                 {
                     "name": "Echoes of the Deep",
@@ -500,7 +600,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_pickaxe", "minecraft:iron_ingot", "minecraft:torch"], "experience": 450},
                     "destination_type": "dungeon",
-                    "destination_prompt": "A deep underground fissure with sculk blocks, cave spider spawners, and deepslate walls",
+                    "destination_prompt": (
+                        "A deep underground fissure dungeon with 3 rooms descending deeper. Upper cavern: "
+                        "cobbled deepslate walls with sculk patches growing along the floor, dim soul torches, "
+                        "chain bridges crossing gaps, and stalactite-like chains hanging from the ceiling. "
+                        "Spider den: deepslate tile walls completely draped in cobwebs, cave spider spawners hidden "
+                        "in alcoves, bone block scattered on the floor, skull decorations on walls, and mushroom "
+                        "blocks growing in dark corners. Sculk chamber: the deepest room with sculk blocks covering "
+                        "the floor and climbing the walls, sculk veins as detail blocks, deepslate brick pillars, "
+                        "soul lanterns casting blue light, a central pit with chains crossing over it, and a "
+                        "treasure chest on a deepslate pedestal at the far end."
+                    ),
                 },
             ],
         }
@@ -518,7 +628,16 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_sword", "minecraft:golden_apple"], "experience": 500},
                     "destination_type": "dungeon",
-                    "destination_prompt": "A nether-themed burial crypt with soul sand, soul torches, and wither skeleton guardians",
+                    "destination_prompt": (
+                        "A nether-themed burial crypt with 3 rooms. Mourning hall: blackstone walls with "
+                        "soul sand floor strips, soul torches in wall brackets, wither skull decorations, "
+                        "chains hanging from the ceiling, and polished blackstone slab coffins along the walls. "
+                        "Crematorium: nether brick walls with magma block floor accents, lava source blocks behind "
+                        "iron bars creating an orange glow, bone block pyres, and crimson fence railings. "
+                        "Warden's sanctum: polished blackstone floor with gold block inlays, a central altar "
+                        "of crying obsidian, soul lanterns in all corners, wither skeleton guardians, "
+                        "and a loot chest flanked by respawn anchor blocks."
+                    ),
                 },
             ],
             "discovery": [
@@ -532,7 +651,16 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:elytra", "minecraft:ender_pearl"], "experience": 700},
                     "destination_type": "temple",
-                    "destination_prompt": "A mystical end-stone temple floating above a void with purpur pillars and ender creatures",
+                    "destination_prompt": (
+                        "A mystical end-themed temple with 3 rooms in a circular layout. Portal chamber: "
+                        "purpur block walls with end stone brick accents, end rod lighting columns from "
+                        "floor to ceiling, a central obsidian platform with ender pearl item frames, and "
+                        "shulker guardians on the walls. Observatory: a tall domed room with purple stained glass "
+                        "ceiling, purpur pillars, enchanting tables on quartz pedestals, and end rod chandeliers. "
+                        "Vault of echoes: end stone brick floor with purpur slab patterns, chorus plant "
+                        "decorations in corners, a dragon head on the back wall, and diamond block and "
+                        "emerald block trophy cases with loot chests."
+                    ),
                 },
             ],
             "invasion": [
@@ -547,7 +675,17 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:diamond_chestplate", "minecraft:crossbow"], "experience": 650},
                     "destination_type": "fort",
-                    "destination_prompt": "A frontier fort with watchtowers, wooden palisades, and a central command tent",
+                    "destination_prompt": (
+                        "A frontier military fort with 3 buildings in a cluster layout connected by gravel paths. "
+                        "Command tent: a large spruce plank building with a flat roof, cobblestone foundation, "
+                        "a war table (cartography table), banners (wool blocks), weapon racks (anvils), and "
+                        "a strategic map (lectern). Barracks: a long building with rows of beds (wool blocks), "
+                        "chests of supplies, furnaces, crafting tables, and armor stands. Watchtower: a 3-story "
+                        "cobblestone tower with a flat roof and battlement exterior, iron bar arrow slits, "
+                        "a ladder system between floors, crossbow storage, and a bell at the top. "
+                        "Surround with a fence palisade wall with torch-lit gate posts. "
+                        "Place iron golems and villagers as garrison defenders."
+                    ),
                 },
             ],
             "mystery": [
@@ -561,7 +699,18 @@ class QuestEngine:
                     ],
                     "rewards": {"items": ["minecraft:enchanted_golden_apple", "minecraft:book", "minecraft:emerald"], "experience": 500},
                     "destination_type": "library",
-                    "destination_prompt": "A vast underground library with towering bookshelves, enchanting tables, and candle-lit reading nooks",
+                    "destination_prompt": (
+                        "A vast underground library with 3-4 rooms in a linear layout. Grand reading hall: "
+                        "a tall room (height 12+) with floor-to-ceiling bookshelves (3-4 blocks high) along "
+                        "every wall, dark oak plank floor with carpet (wool) runners, enchanting tables on "
+                        "oak pedestals in the center, lecterns with books at reading desks, candle clusters "
+                        "on every surface, and chain-hung lanterns from the ceiling. Archive wing: narrower "
+                        "corridors lined with bookshelves, cobweb-covered alcoves with rare book chests, "
+                        "iron bar locked sections, and soul torches for eerie lighting. Study chamber: "
+                        "a circular room with a domed ceiling, a central enchanting table surrounded by "
+                        "maximum bookshelves, brewing stands in one corner, an alchemy station, "
+                        "and candles everywhere. The walls use dark oak planks with stone brick foundations."
+                    ),
                 },
             ],
         }

@@ -60,6 +60,7 @@ class PlacedBlueprint(BaseModel):
     """Blueprint with all coordinates resolved to absolute world positions."""
     name: str
     structure_type: str = "dungeon"
+    karma_tier: str = "neutral"
     rooms: list[PlacedRoom]
     corridors: list[PlacedCorridor]
 
@@ -490,6 +491,7 @@ def _select_layout(blueprint: Blueprint) -> str:
 
 def solve_placement(
     blueprint: Blueprint, player_x: int, player_y: int, player_z: int,
+    karma_tier: str = "neutral",
 ) -> PlacedBlueprint:
     """Place rooms using the appropriate layout strategy.
 
@@ -519,6 +521,7 @@ def solve_placement(
     return PlacedBlueprint(
         name=blueprint.name,
         structure_type=blueprint.structure_type,
+        karma_tier=karma_tier,
         rooms=placed_rooms,
         corridors=placed_corridors,
     )

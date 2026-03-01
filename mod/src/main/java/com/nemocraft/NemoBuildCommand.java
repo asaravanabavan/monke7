@@ -39,6 +39,7 @@ public class NemoBuildCommand {
         }
 
         String playerName = player.getName().getString();
+        String playerUuid = player.getUuidAsString();
         BlockPos pos = player.getBlockPos();
         double x = pos.getX();
         double y = pos.getY();
@@ -53,7 +54,7 @@ public class NemoBuildCommand {
         source.sendFeedback(() -> Text.literal("[NemoCraft] Generating dungeon: \"" + prompt + "\"..."), true);
 
         // Async HTTP call
-        BackendClient.requestBuild(prompt, playerName, x, y, z, biome)
+        BackendClient.requestBuild(prompt, playerName, playerUuid, x, y, z, biome)
                 .thenAccept(response -> {
                     // Route response back to server thread
                     source.getServer().execute(() -> {

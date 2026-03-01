@@ -21,6 +21,8 @@ from backend.builder import BuildExecutor
 from backend.stats import PlayerProfile
 from backend.narrative import NarrativeEngine, NarrativeContext
 from backend.quests import QuestEngine, QuestType
+from backend.karma import KarmaTier, TIER_PALETTES
+from backend.villain import VillainAgent
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -133,18 +135,25 @@ async def api_build(req: BuildRequest):
     # 2. Build narrative context if player_uuid is provided
     narrative_context: NarrativeContext | None = None
     narrative_engine: NarrativeEngine | None = None
+    karma_tier_str = "neutral"
     if req.player_uuid:
         try:
             narrative_engine = NarrativeEngine(data_dir=DATA_DIR)
             narrative_context = narrative_engine.build_context(
                 req.player_uuid, req.player_name,
             )
+            karma_tier_str = narrative_context.karma_tier
             logger.info(
-                "Narrative context built for %s: theme=%s, difficulty=%d",
+                "Narrative context built for %s: theme=%s, difficulty=%d, karma=%s",
                 req.player_uuid,
                 narrative_context.theme,
                 narrative_context.difficulty_level,
+                karma_tier_str,
             )
+            # Karma palette override when no explicit palette requested
+            if not req.palette and narrative_context.karma_palette:
+                palette = narrative_context.karma_palette
+                logger.info("Karma palette override: %s", palette)
         except Exception:
             logger.exception("Failed to build narrative context, proceeding without it")
             narrative_context = None
@@ -161,7 +170,10 @@ async def api_build(req: BuildRequest):
         blueprint = get_fallback_blueprint(palette, structure_type)
 
     # 4. Solve placement
-    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z))
+    placed = solve_placement(
+        blueprint, int(req.x), int(req.y), int(req.z),
+        karma_tier=karma_tier_str,
+    )
 
     # 5. Build in-world via RCON
     try:
@@ -193,10 +205,16 @@ async def api_build(req: BuildRequest):
 
 @app.post("/api/stats")
 async def api_stats(req: StatsRequest):
-    """Ingest a player stats snapshot."""
+    """Ingest a player stats snapshot and return karma state."""
     profile = PlayerProfile(req.player_uuid, data_dir=DATA_DIR)
     profile.add_snapshot(req.stats)
-    return {"status": "ok"}
+    karma_score = profile.get_karma_score()
+    karma_tier = profile.get_karma_tier()
+    return {
+        "status": "ok",
+        "karma_score": karma_score,
+        "karma_tier": karma_tier.value,
+    }
 
 
 @app.post("/api/check")
@@ -226,25 +244,31 @@ async def api_check(req: CheckRequest):
             return {"generate": False, "message": "Cooldown active"}
 
     # 3. Should generate — build narrative context
+    karma_tier_str = "neutral"
     try:
         narrative_context = narrative_engine.build_context(
             req.player_uuid, "Adventurer",
         )
+        karma_tier_str = narrative_context.karma_tier
     except Exception:
         logger.exception("Failed to build narrative context for auto-gen")
         narrative_context = None
 
     # 4. Generate blueprint (with fallback)
     narrative_dict = narrative_context.model_dump() if narrative_context else None
-    palette = narrative_context.theme if narrative_context else "stone"
-    # Map narrative themes to palettes
-    palette_map = {
-        "retribution": "nether",
-        "discovery": "stone",
-        "invasion": "deepslate",
-        "mystery": "end",
-    }
-    palette = palette_map.get(palette, "stone")
+
+    # Karma palette takes priority, then theme-based palette
+    if narrative_context and narrative_context.karma_palette:
+        palette = narrative_context.karma_palette
+    else:
+        palette = narrative_context.theme if narrative_context else "stone"
+        palette_map = {
+            "retribution": "nether",
+            "discovery": "stone",
+            "invasion": "deepslate",
+            "mystery": "end",
+        }
+        palette = palette_map.get(palette, "stone")
 
     try:
         blueprint = await generate_blueprint(
@@ -255,7 +279,10 @@ async def api_check(req: CheckRequest):
         blueprint = get_fallback_blueprint(palette)
 
     # 5. Place and build
-    placed = solve_placement(blueprint, int(req.x), int(req.y), int(req.z))
+    placed = solve_placement(
+        blueprint, int(req.x), int(req.y), int(req.z),
+        karma_tier=karma_tier_str,
+    )
 
     try:
         executor = BuildExecutor()
@@ -461,3 +488,116 @@ async def api_quests_complete(req: QuestCompleteRequest):
         result["message"] = f"Quest complete: {target_quest.name}"
 
     return result
+
+
+# ---------------------------------------------------------------------------
+# Karma endpoint
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/karma/{player_uuid}")
+async def api_karma(player_uuid: str):
+    """Debug endpoint: return full karma state for a player."""
+    profile = PlayerProfile(player_uuid, data_dir=DATA_DIR)
+    karma = profile.karma
+    score = profile.get_karma_score()
+    tier = profile.get_karma_tier()
+    return {
+        "player_uuid": player_uuid,
+        "karma_score": score,
+        "karma_tier": tier.value,
+        "dimensions": {
+            "violence": round(karma.violence, 2),
+            "nature": round(karma.nature, 2),
+            "social": round(karma.social, 2),
+        },
+        "last_updated": karma.last_updated,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Villain chatbot request models
+# ---------------------------------------------------------------------------
+
+
+class VillainChatRequest(BaseModel):
+    player_uuid: str
+    player_name: str = "Player"
+    message: str
+    x: float = 0
+    y: float = 64
+    z: float = 0
+
+
+class VillainEventRequest(BaseModel):
+    player_uuid: str
+    player_name: str = "Player"
+    event_type: str
+    event_data: dict = {}
+    x: float = 0
+    y: float = 64
+    z: float = 0
+
+
+# ---------------------------------------------------------------------------
+# Villain endpoints
+# ---------------------------------------------------------------------------
+
+
+@app.get("/api/villain/status")
+async def api_villain_status():
+    """Check if the villain chatbot is enabled."""
+    return {
+        "enabled": settings.villain_enabled,
+        "name": settings.villain_name,
+    }
+
+
+@app.post("/api/villain/chat")
+async def api_villain_chat(req: VillainChatRequest):
+    """Player chat routed to the villain agent."""
+    if not settings.villain_enabled:
+        return {"status": "disabled"}
+
+    agent = VillainAgent(data_dir=DATA_DIR)
+    try:
+        result = await agent.respond(
+            player_uuid=req.player_uuid,
+            player_name=req.player_name,
+            message=req.message,
+            x=req.x,
+            y=req.y,
+            z=req.z,
+        )
+    except Exception:
+        logger.exception("Villain chat failed")
+        return {"status": "error", "message": "Villain agent encountered an error"}
+
+    return {"status": "ok", **result}
+
+
+@app.post("/api/villain/event")
+async def api_villain_event(req: VillainEventRequest):
+    """Game event notification routed to the villain agent."""
+    if not settings.villain_enabled:
+        return {"status": "disabled"}
+
+    agent = VillainAgent(data_dir=DATA_DIR)
+    try:
+        result = await agent.react_to_event(
+            player_uuid=req.player_uuid,
+            player_name=req.player_name,
+            event_type=req.event_type,
+            event_data=req.event_data,
+            x=req.x,
+            y=req.y,
+            z=req.z,
+        )
+    except Exception:
+        logger.exception("Villain event reaction failed")
+        return {"status": "error", "message": "Villain event reaction failed"}
+
+    if result is None:
+        return {"status": "ok", "reacted": False}
+
+    return {"status": "ok", "reacted": True, **result}

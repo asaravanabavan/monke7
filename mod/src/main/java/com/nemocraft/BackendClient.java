@@ -19,10 +19,11 @@ public class BackendClient {
         private static final Gson GSON = new Gson();
 
         public static CompletableFuture<JsonObject> requestBuild(String prompt, String playerName,
-                        double x, double y, double z, String biome) {
+                        String playerUuid, double x, double y, double z, String biome) {
                 JsonObject body = new JsonObject();
                 body.addProperty("prompt", prompt);
                 body.addProperty("player_name", playerName);
+                body.addProperty("player_uuid", playerUuid);
                 body.addProperty("x", x);
                 body.addProperty("y", y);
                 body.addProperty("z", z);
@@ -156,6 +157,65 @@ public class BackendClient {
                                 .header("Content-Type", "application/json")
                                 .timeout(Duration.ofSeconds(120))
                                 .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        // -- Villain endpoints ------------------------------------------------
+
+        public static CompletableFuture<JsonObject> villainChat(String playerUuid, String playerName,
+                        String message, double x, double y, double z) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("player_name", playerName);
+                body.addProperty("message", message);
+                body.addProperty("x", x);
+                body.addProperty("y", y);
+                body.addProperty("z", z);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/villain/chat"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(30))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> villainEvent(String playerUuid, String playerName,
+                        String eventType, String eventData, double x, double y, double z) {
+                JsonObject body = new JsonObject();
+                body.addProperty("player_uuid", playerUuid);
+                body.addProperty("player_name", playerName);
+                body.addProperty("event_type", eventType);
+                JsonObject eventDataObj = new JsonObject();
+                eventDataObj.addProperty("entity", eventData);
+                body.add("event_data", eventDataObj);
+                body.addProperty("x", x);
+                body.addProperty("y", y);
+                body.addProperty("z", z);
+
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/villain/event"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(15))
+                                .POST(HttpRequest.BodyPublishers.ofString(GSON.toJson(body)))
+                                .build();
+
+                return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                                .thenApply(response -> GSON.fromJson(response.body(), JsonObject.class));
+        }
+
+        public static CompletableFuture<JsonObject> villainStatus() {
+                HttpRequest request = HttpRequest.newBuilder()
+                                .uri(URI.create(BACKEND_URL + "/api/villain/status"))
+                                .header("Content-Type", "application/json")
+                                .timeout(Duration.ofSeconds(10))
+                                .GET()
                                 .build();
 
                 return CLIENT.sendAsync(request, HttpResponse.BodyHandlers.ofString())

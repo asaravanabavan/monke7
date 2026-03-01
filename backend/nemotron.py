@@ -255,8 +255,38 @@ def _build_user_prompt(
     if narrative_context:
         ctx_lines: list[str] = []
         for key, value in narrative_context.items():
+            if key.startswith("karma_"):
+                continue  # handled separately below
             ctx_lines.append(f"- {key}: {value}")
         parts.append("Narrative context:\n" + "\n".join(ctx_lines))
+
+        # Add karma alignment section when karma is non-neutral
+        karma_tier = narrative_context.get("karma_tier", "neutral")
+        karma_narrative = narrative_context.get("karma_narrative", "")
+        karma_mood = narrative_context.get("karma_mood", "")
+        karma_palette = narrative_context.get("karma_palette", "")
+        if karma_tier != "neutral" and karma_narrative:
+            karma_section = (
+                f"## KARMA ALIGNMENT\n"
+                f"- Tier: {karma_tier}\n"
+                f"- Mood: {karma_mood}\n"
+                f"- Palette: {karma_palette}\n"
+                f"- {karma_narrative}\n"
+                f"\n"
+                f"The dungeon name, room names, block choices, and mob selections "
+                f"MUST reflect the {karma_tier} karma alignment. "
+            )
+            if karma_tier in ("abyssal", "dark", "shadowed"):
+                karma_section += (
+                    "Use dark, ominous, corrupted themes. "
+                    "Names should evoke dread, punishment, or decay."
+                )
+            elif karma_tier in ("blessed", "sacred", "celestial"):
+                karma_section += (
+                    "Use light, holy, ethereal themes. "
+                    "Names should evoke divinity, hope, or transcendence."
+                )
+            parts.append(karma_section)
 
     parts.append(
         "Return the structure blueprint as a JSON object that follows the schema "
@@ -821,14 +851,36 @@ Each quest object has these fields:
 ## Valid item IDs for rewards and collect objectives
 {json.dumps(sorted(list(VALID_ITEM_IDS)), indent=0)}
 
+## CRITICAL: destination_prompt MUST be EXTREMELY DETAILED
+
+The destination_prompt is the most important field. It gets fed directly to a structure
+generator AI that builds the location in Minecraft. You MUST include:
+- **Room count**: "3-4 rooms" or "4-5 buildings" — always specify multiple rooms.
+- **Room purposes**: name and describe each room (e.g. "Entry hall", "Guard room", "Treasury").
+- **Block materials**: specify exact Minecraft blocks (e.g. "stone_bricks", "deepslate_tiles",
+  "oak_planks", "polished_blackstone") for walls, floors, and ceilings.
+- **Details per room**: describe 5+ decorative elements per room (pillars, lighting, furniture,
+  cobwebs, chains, banners, bookshelves, anvils, etc.).
+- **Mob placement**: describe which mobs go where and why.
+- **Atmosphere**: lighting type (lanterns, soul torches, candles, sea lanterns), mood, and theme.
+- **Architectural features**: roof types, windows, doors, multi-story, columns, arches.
+
+BAD destination_prompt: "A dark dungeon with zombies"
+GOOD destination_prompt: "A 3-room stone brick crypt. Entry hall: cracked stone brick walls
+with iron bar windows, cobweb ceiling, soul torch sconces, and skeleton archers in alcoves.
+Burial chamber: deepslate floor with bone block accents, zombie spawners behind iron bars,
+hanging chains, and skull wall decorations. Treasure vault: polished blackstone floor with
+gold block pedestals, diamond block accents, a central loot chest, and lantern chandeliers."
+
 ## Rules
 1. Make quests feel like part of an ongoing story — reference the player's actions.
 2. Vary objective types within a quest (don't make all objectives the same type).
 3. Match quest difficulty to the narrative difficulty level provided.
-4. Make destination_prompt DETAILED — it will be used to generate the actual structure.
+4. The destination_prompt MUST be 100-200 words describing a multi-room structure.
 5. Quest givers should have distinct personalities and titles.
 6. Never repeat quest names from the recent_completed list.
-7. Output **only** the JSON object — no markdown fences, no commentary.
+7. Each quest should lead to a DIFFERENT destination_type.
+8. Output **only** the JSON object — no markdown fences, no commentary.
 """
 
 

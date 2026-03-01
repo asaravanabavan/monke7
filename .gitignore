@@ -8,4 +8,5 @@ player_data/
 mod/build/
 mod/.gradle/
 mod/*.jar
+server/logs/
 *.log

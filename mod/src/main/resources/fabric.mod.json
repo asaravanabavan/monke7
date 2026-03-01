@@ -9,7 +9,8 @@
   "icon": "",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.nemocraft.NemoCraft"]
+    "main": ["com.nemocraft.NemoCraft"],
+    "client": ["com.nemocraft.NemoCraftClient"]
   },
   "mixins": [],
   "depends": {
